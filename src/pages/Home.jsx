@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Aurora from '../components/Aurora'
-import HeroObject from '../components/HeroObject'
+import TechOrb from '../components/TechOrb'
+import RotatingWord from '../components/RotatingWord'
 import { useSEO } from '../hooks/useSEO'
 
 const capabilities = [
@@ -56,93 +57,96 @@ export default function Home() {
       {/* ===== HERO ===== */}
       <section style={{
         position: 'relative',
-        minHeight: '100vh',
         overflow: 'hidden',
-        display: 'flex', alignItems: 'center',
-        paddingTop: '8rem', paddingBottom: '4rem',
+        paddingTop: 'clamp(8rem, 14vh, 11rem)',
+        paddingBottom: 'clamp(4rem, 8vh, 6rem)',
       }}>
-        <Aurora intensity={1} />
+        <Aurora intensity={0.8} />
 
-        {/* 3D object — desktop only, absolute right */}
-        <div className="hero-3d" style={{
-          position: 'absolute', top: 0, right: 0,
-          width: '55%', height: '100%', zIndex: 1,
-          opacity: 0.9,
+        <div className="container hero-grid" style={{
+          position: 'relative', zIndex: 2,
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr)',
+          gap: 'clamp(2rem, 5vw, 5rem)',
+          alignItems: 'center',
         }}>
-          <HeroObject />
-        </div>
+          {/* LEFT: type */}
+          <div>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="eyebrow"
+              style={{ marginBottom: '1.75rem' }}
+            >
+              Digital Marketing Studio · Vizag, India
+            </motion.p>
 
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="eyebrow"
-            style={{ marginBottom: '2rem' }}
-          >
-            Digital Marketing Studio · Vizag, India
-          </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.05 }}
+              className="display"
+              style={{
+                fontSize: 'clamp(2.25rem, 5vw, 4rem)',
+                marginBottom: '1.75rem',
+              }}
+            >
+              <span style={{ display: 'block' }}>Growth for</span>
+              <span style={{ display: 'block' }}>
+                <RotatingWord
+                  words={['restaurants', 'clinics', 'temples', 'startups', 'brands']}
+                />
+              </span>
+              <span style={{ display: 'block' }}>built by real humans.</span>
+            </motion.h1>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-            className="display"
-            style={{
-              fontSize: 'clamp(3rem, 9vw, 8rem)',
-              maxWidth: '15ch',
-              marginBottom: '2rem',
-            }}
-          >
-            Growth for <span style={{ color: 'var(--lime)' }}>local</span> businesses,
-            <br />built by real humans.
-          </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              style={{
+                maxWidth: '480px',
+                fontSize: 'clamp(0.98rem, 1.1vw, 1.05rem)',
+                color: 'var(--muted-2)',
+                lineHeight: 1.65,
+                marginBottom: '2.25rem',
+              }}
+            >
+              A tight team of marketers, designers and engineers helping local businesses across
+              the US, UAE and India show up online, get found, and win their neighborhoods.
+            </motion.p>
 
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            style={{
-              maxWidth: '520px',
-              fontSize: 'clamp(1rem, 1.3vw, 1.15rem)',
-              color: 'var(--muted-2)',
-              lineHeight: 1.65,
-              marginBottom: '2.75rem',
-            }}
-          >
-            We are Pandr Solutions. A tight team of marketers, designers and engineers helping
-            restaurants, clinics, temples and tech startups across the US, UAE and India show up
-            online, get found, and win their neighborhoods.
-          </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+              style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}
+            >
+              <Link to="/contact" className="btn-primary">
+                Start a project <span style={{ fontSize: '1.1rem' }}>→</span>
+              </Link>
+              <Link to="/work" className="btn-ghost">
+                See our work
+              </Link>
+            </motion.div>
+          </div>
 
+          {/* RIGHT: chart */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="hero-visual"
+            style={{
+              height: '100%',
+              minHeight: '380px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
           >
-            <Link to="/contact" className="btn-primary">
-              Start a project <span style={{ fontSize: '1.1rem' }}>→</span>
-            </Link>
-            <Link to="/work" className="btn-ghost">
-              See our work
-            </Link>
+            <TechOrb />
           </motion.div>
         </div>
 
-        {/* scroll cue */}
-        <div style={{
-          position: 'absolute', bottom: '2rem', left: '50%',
-          transform: 'translateX(-50%)', zIndex: 3,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-          color: 'var(--muted)', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase',
-        }}>
-          <span>Scroll</span>
-          <span style={{
-            width: 1, height: 32,
-            background: 'linear-gradient(to bottom, var(--muted), transparent)',
-          }} />
-        </div>
-
         <style>{`
-          @media (max-width: 900px) {
-            .hero-3d { opacity: 0.35 !important; width: 100% !important; }
+          @media (max-width: 860px) {
+            .hero-grid { grid-template-columns: 1fr !important; }
+            .hero-visual { min-height: 320px !important; margin-top: 1rem; }
           }
         `}</style>
       </section>
