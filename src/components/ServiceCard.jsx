@@ -76,17 +76,19 @@ export default function ServiceCard({
       onMouseMove={onMove}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
+      className="service-card"
+      data-last-col={index === columns - 1 ? 'true' : 'false'}
       style={{
         position: 'relative',
-        padding: '2.5rem',
-        borderRight: index < columns - 1 ? '1px solid var(--border)' : 'none',
-        borderBottom: '1px solid var(--border)',
+        padding: 'clamp(1.75rem, 4vw, 2.5rem)',
         display: 'flex', flexDirection: 'column', gap: '1.25rem',
         overflow: 'hidden',
         transformStyle: 'preserve-3d',
         willChange: 'transform',
         transition: 'background 0.4s ease',
         background: hover ? 'rgba(196,255,61,0.02)' : 'transparent',
+        borderRight: index < columns - 1 ? '1px solid var(--border)' : 'none',
+        borderBottom: '1px solid var(--border)',
       }}
       data-cursor="hover"
     >

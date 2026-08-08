@@ -93,32 +93,68 @@ export default function Navbar() {
       </header>
 
       {open && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 99,
-          background: 'rgba(0,0,0,0.98)',
-          backdropFilter: 'blur(24px)',
-          paddingTop: '5rem',
-          display: 'flex', flexDirection: 'column',
-        }}>
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 99,
+            background: 'rgba(0,0,0,0.98)',
+            backdropFilter: 'blur(24px)',
+            paddingTop: '5rem',
+            display: 'flex', flexDirection: 'column',
+            animation: 'mobile-menu-fade 0.35s ease-out',
+          }}
+        >
           <nav className="container" style={{
-            display: 'flex', flexDirection: 'column', gap: '0.5rem',
+            display: 'flex', flexDirection: 'column',
             paddingTop: '2rem',
           }}>
-            {links.map(({ to, label, end }) => (
-              <NavLink key={to} to={to} end={end} style={({ isActive }) => ({
-                fontFamily: 'var(--font-display)',
-                fontSize: '2.5rem',
-                fontWeight: 500,
-                letterSpacing: '-0.02em',
-                color: isActive ? 'var(--lime)' : 'var(--white)',
-                padding: '0.5rem 0',
-                borderBottom: '1px solid var(--border)',
-              })}>
-                {label}
+            {links.map(({ to, label, end }, i) => (
+              <NavLink
+                key={to} to={to} end={end}
+                style={({ isActive }) => ({
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(2.25rem, 8vw, 3.25rem)',
+                  fontWeight: 500,
+                  letterSpacing: '-0.02em',
+                  color: isActive ? 'var(--lime)' : 'var(--white)',
+                  padding: '0.75rem 0',
+                  borderBottom: '1px solid var(--border)',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  animation: `mobile-menu-item 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) ${0.08 + i * 0.06}s both`,
+                })}
+              >
+                {({ isActive }) => (
+                  <>
+                    <span>{label}</span>
+                    <span style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '0.7rem',
+                      color: isActive ? 'var(--lime)' : 'var(--muted)',
+                      letterSpacing: '0.1em',
+                    }}>0{i + 1}</span>
+                  </>
+                )}
               </NavLink>
             ))}
-            <div style={{ marginTop: '2rem' }}>
+            <div style={{
+              marginTop: '2.5rem',
+              animation: `mobile-menu-item 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) ${0.08 + links.length * 0.06}s both`,
+            }}>
               <PillCTA to="/contact">Start a project</PillCTA>
+            </div>
+            <div style={{
+              marginTop: '3rem',
+              paddingTop: '2rem',
+              borderTop: '1px solid var(--border)',
+              display: 'flex', flexDirection: 'column', gap: '0.5rem',
+              animation: `mobile-menu-item 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) ${0.08 + (links.length + 1) * 0.06}s both`,
+            }}>
+              <p className="eyebrow-muted">Reach us</p>
+              <a href="mailto:pushpit@pandrsol.com" style={{
+                color: 'var(--lime)', fontWeight: 500, fontSize: '0.95rem',
+              }}>pushpit@pandrsol.com</a>
+              <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
+                Digital Marketing Studio · India
+              </p>
             </div>
           </nav>
         </div>
@@ -128,6 +164,14 @@ export default function Navbar() {
         @media (max-width: 940px) {
           .desktop-nav { display: none !important; }
           .hamburger { display: flex !important; }
+        }
+        @keyframes mobile-menu-fade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes mobile-menu-item {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </>

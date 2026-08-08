@@ -154,7 +154,10 @@ export default function Home() {
         <style>{`
           @media (max-width: 860px) {
             .hero-grid { grid-template-columns: minmax(0, 1fr) !important; }
-            .hero-visual { min-height: 320px !important; margin-top: 1rem; }
+            .hero-visual { min-height: 340px !important; margin-top: 1.5rem; height: 340px !important; }
+          }
+          @media (max-width: 480px) {
+            .hero-visual { min-height: 280px !important; height: 280px !important; }
           }
           .hero-grid h1 { word-break: break-word; overflow-wrap: anywhere; }
           .hero-grid h1 > span { overflow-wrap: anywhere; }
@@ -267,13 +270,13 @@ export default function Home() {
       {/* ===== APPROACH ===== */}
       <section className="section">
         <div className="container">
-          <div style={{
+          <div className="approach-grid" style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
             gap: 'clamp(2rem, 5vw, 5rem)',
             alignItems: 'flex-start',
           }}>
-            <div style={{ position: 'sticky', top: '6rem' }}>
+            <div className="approach-intro" style={{ position: 'sticky', top: '6rem' }}>
               <p className="eyebrow" style={{ marginBottom: '1rem' }}>How we work</p>
               <RevealText
                 as="h2"
@@ -313,6 +316,12 @@ export default function Home() {
             </ol>
           </div>
         </div>
+        <style>{`
+          @media (max-width: 860px) {
+            .approach-grid { grid-template-columns: minmax(0, 1fr) !important; }
+            .approach-intro { position: static !important; top: auto !important; }
+          }
+        `}</style>
       </section>
 
       {/* ===== INTERACTIVE DOT FIELD ===== */}

@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 
 const LIME = '#C4FF3D'
@@ -223,20 +223,25 @@ function ResponsiveCamera({ padding = 1.35 }) {
  * ref updated on pointer move so the useFrame loop stays independent
  * of React re-renders.
  */
-function InteractiveRig({ pointer, children }) {
+function InteractiveRig({ pointer, isTouch, children }) {
   const groupRef = useRef()
 
   useFrame((_, dt) => {
     if (!groupRef.current) return
-    // spring toward target angles
     const t = pointer.current
     const cx = groupRef.current.rotation.x
     const cy = groupRef.current.rotation.y
-    // ease with dt-aware lerp
     const k = 1 - Math.pow(0.0004, dt)
-    groupRef.current.rotation.x = cx + (t.rx - cx) * k
-    groupRef.current.rotation.y = cy + (t.ry - cy) * k
-    // scale slightly on active
+
+    // On touch: gentle auto-rotate + any active touch nudges it
+    if (isTouch) {
+      groupRef.current.rotation.y = cy + dt * 0.18 + (t.ry - cy) * k * 0.35
+      groupRef.current.rotation.x = cx + (t.rx - cx) * k * 0.5
+    } else {
+      groupRef.current.rotation.x = cx + (t.rx - cx) * k
+      groupRef.current.rotation.y = cy + (t.ry - cy) * k
+    }
+
     const targetScale = 1 + t.active * 0.06
     const cs = groupRef.current.scale.x
     groupRef.current.scale.setScalar(cs + (targetScale - cs) * k)
@@ -249,20 +254,38 @@ function InteractiveRig({ pointer, children }) {
 export default function TechOrb() {
   const wrapRef = useRef(null)
   const pointer = useRef({ rx: 0, ry: 0, active: 0 })
+  const [isTouch, setIsTouch] = useState(false)
 
-  const onMove = (e) => {
+  useEffect(() => {
+    setIsTouch(window.matchMedia?.('(pointer: coarse)').matches)
+  }, [])
+
+  const setFromClient = (clientX, clientY, active = 1) => {
     const wrap = wrapRef.current
     if (!wrap) return
     const r = wrap.getBoundingClientRect()
-    const nx = ((e.clientX - r.left) / r.width - 0.5) * 2  // -1..1
-    const ny = ((e.clientY - r.top) / r.height - 0.5) * 2
-    // Map to reasonable rotation ranges
-    pointer.current.ry = nx * 0.6   // horizontal cursor rotates around Y
-    pointer.current.rx = ny * 0.4   // vertical cursor rotates around X (inverted feels natural)
-    pointer.current.active = 1
+    const nx = ((clientX - r.left) / r.width - 0.5) * 2
+    const ny = ((clientY - r.top) / r.height - 0.5) * 2
+    pointer.current.ry = nx * 0.6
+    pointer.current.rx = ny * 0.4
+    pointer.current.active = active
   }
 
+  const onMove = (e) => setFromClient(e.clientX, e.clientY, 1)
+
   const onLeave = () => {
+    pointer.current.rx = 0
+    pointer.current.ry = 0
+    pointer.current.active = 0
+  }
+
+  const onTouchMove = (e) => {
+    if (e.touches?.[0]) {
+      setFromClient(e.touches[0].clientX, e.touches[0].clientY, 1)
+    }
+  }
+  const onTouchEnd = () => {
+    // Ease back to auto-rotate baseline on release
     pointer.current.rx = 0
     pointer.current.ry = 0
     pointer.current.active = 0
@@ -273,13 +296,17 @@ export default function TechOrb() {
       ref={wrapRef}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
       style={{
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: '420px',
+        minHeight: '360px',
         overflow: 'hidden',
-        cursor: 'grab',
+        cursor: isTouch ? 'default' : 'grab',
+        touchAction: 'pan-y',
       }}
       data-cursor="hover"
     >
@@ -296,13 +323,12 @@ export default function TechOrb() {
           <pointLight position={[3, 3, 3]} color={LIME} intensity={1.1} />
           <pointLight position={[-3, -2, -2]} color={BLUE} intensity={0.4} />
 
-          <Particles count={110} />
+          <Particles count={isTouch ? 60 : 110} />
 
-          <InteractiveRig pointer={pointer}>
+          <InteractiveRig pointer={pointer} isTouch={isTouch}>
             <Core />
             <StaticEdges />
 
-            {/* Satellites — tight orbits, always inside camera frustum */}
             <Satellite radius={1.55} speed={0.85} tilt={[0.2,  0, 0]} phase={0.0} />
             <Satellite radius={1.7}  speed={0.55} tilt={[0.9,  0, 0]} phase={1.4} />
             <Satellite radius={1.85} speed={0.42} tilt={[-0.4, 0, 0]} phase={3.1} color={BLUE} size={0.045} />

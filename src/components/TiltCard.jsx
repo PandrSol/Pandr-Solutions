@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useInView } from '../hooks/useInView'
 
 /**
- * TiltCard — subtle 3D perspective tilt on hover based on cursor position.
- * A soft lime radial glow follows the cursor within the card.
- * Fully accessible: no functional dependency on hover, just an enhancement.
+ * TiltCard — 3D perspective tilt + cursor-following glow on desktop.
+ * On touch devices (no cursor), transforms into a scroll-triggered
+ * fade + rise + soft lime glow that pulses in and settles.
  */
 export default function TiltCard({
   children,
@@ -14,28 +15,42 @@ export default function TiltCard({
   glow = true,
   ...rest
 }) {
+  const [isTouch, setIsTouch] = useState(false)
   const ref = useRef(null)
   const glowRef = useRef(null)
   const rafRef = useRef(0)
   const target = useRef({ rx: 0, ry: 0, gx: 50, gy: 50, active: 0 })
   const current = useRef({ rx: 0, ry: 0, gx: 50, gy: 50, active: 0 })
+  const [viewRef, inView] = useInView({ threshold: 0.15 })
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia?.('(pointer: coarse)').matches)
+  }, [])
+
+  // combine both refs
+  const setRefs = (el) => {
+    ref.current = el
+    if (typeof viewRef === 'function') viewRef(el)
+    else if (viewRef) viewRef.current = el
+  }
 
   const onMove = (e) => {
+    if (isTouch) return
     const el = ref.current
     if (!el) return
     const r = el.getBoundingClientRect()
-    const nx = (e.clientX - r.left) / r.width  // 0..1
-    const ny = (e.clientY - r.top) / r.height // 0..1
-    target.current.rx = (ny - 0.5) * -2 * maxTilt // rotateX
-    target.current.ry = (nx - 0.5) *  2 * maxTilt // rotateY
+    const nx = (e.clientX - r.left) / r.width
+    const ny = (e.clientY - r.top) / r.height
+    target.current.rx = (ny - 0.5) * -2 * maxTilt
+    target.current.ry = (nx - 0.5) *  2 * maxTilt
     target.current.gx = nx * 100
     target.current.gy = ny * 100
     target.current.active = 1
-
     if (!rafRef.current) loop()
   }
 
   const onLeave = () => {
+    if (isTouch) return
     target.current = { rx: 0, ry: 0, gx: 50, gy: 50, active: 0 }
     if (!rafRef.current) loop()
   }
@@ -67,13 +82,18 @@ export default function TiltCard({
 
   return (
     <Tag
-      ref={ref}
+      ref={setRefs}
       className={className}
       style={{
         position: 'relative',
         transformStyle: 'preserve-3d',
-        transition: 'transform 0.05s linear',
-        willChange: 'transform',
+        transition: isTouch
+          ? 'opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)'
+          : 'transform 0.05s linear',
+        willChange: 'transform, opacity',
+        // Mobile: scroll-triggered rise + fade
+        opacity: isTouch && !inView ? 0 : 1,
+        transform: isTouch && !inView ? 'translateY(28px)' : undefined,
         ...style,
       }}
       onMouseMove={onMove}
@@ -81,7 +101,7 @@ export default function TiltCard({
       {...rest}
     >
       {children}
-      {glow && (
+      {glow && !isTouch && (
         <div
           ref={glowRef}
           aria-hidden="true"
@@ -91,6 +111,19 @@ export default function TiltCard({
             borderRadius: 'inherit',
             opacity: 0,
             transition: 'opacity 0.3s ease',
+          }}
+        />
+      )}
+      {/* Mobile: a subtle static lime edge glow that fades in on scroll */}
+      {glow && isTouch && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            boxShadow: inView ? 'inset 0 0 40px rgba(196,255,61,0.04)' : 'inset 0 0 0 rgba(196,255,61,0)',
+            transition: 'box-shadow 1s ease 0.2s',
           }}
         />
       )}

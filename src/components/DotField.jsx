@@ -57,10 +57,14 @@ export default function DotField({
       s.dots = dots
     }
 
-    const onMove = (e) => {
+    const setFrom = (clientX, clientY) => {
       const rect = wrap.getBoundingClientRect()
-      s.mouse.x = e.clientX - rect.left
-      s.mouse.y = e.clientY - rect.top
+      s.mouse.x = clientX - rect.left
+      s.mouse.y = clientY - rect.top
+    }
+    const onMove = (e) => setFrom(e.clientX, e.clientY)
+    const onTouch = (e) => {
+      if (e.touches?.[0]) setFrom(e.touches[0].clientX, e.touches[0].clientY)
     }
     const onLeave = () => {
       s.mouse.x = -9999
@@ -71,6 +75,9 @@ export default function DotField({
     window.addEventListener('resize', setup)
     wrap.addEventListener('mousemove', onMove)
     wrap.addEventListener('mouseleave', onLeave)
+    wrap.addEventListener('touchmove', onTouch, { passive: true })
+    wrap.addEventListener('touchend', onLeave)
+    wrap.addEventListener('touchcancel', onLeave)
 
     let raf = 0
     const tick = () => {
@@ -120,6 +127,9 @@ export default function DotField({
       window.removeEventListener('resize', setup)
       wrap.removeEventListener('mousemove', onMove)
       wrap.removeEventListener('mouseleave', onLeave)
+      wrap.removeEventListener('touchmove', onTouch)
+      wrap.removeEventListener('touchend', onLeave)
+      wrap.removeEventListener('touchcancel', onLeave)
     }
   }, [spacing, dotRadius, color, hoverColor, repel, strength, spring, damping])
 
