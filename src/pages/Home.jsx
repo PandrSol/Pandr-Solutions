@@ -8,6 +8,8 @@ import RevealText from '../components/RevealText'
 import Counter from '../components/Counter'
 import DotField from '../components/DotField'
 import TiltCard from '../components/TiltCard'
+import ServiceCard from '../components/ServiceCard'
+import ProcessStep from '../components/ProcessStep'
 import { useSEO } from '../hooks/useSEO'
 
 const capabilities = [
@@ -247,7 +249,15 @@ export default function Home() {
             background: 'var(--surface-2)',
           }}>
             {services.map((s, i) => (
-              <ServiceCard key={s.title} svc={s} index={i} />
+              <ServiceCard
+                key={s.title}
+                n={s.n}
+                title={s.title}
+                body={s.body}
+                deliverables={s.deliverables}
+                index={i}
+                columns={4}
+              />
             ))}
           </div>
         </div>
@@ -281,31 +291,24 @@ export default function Home() {
               </p>
             </div>
 
-            <ol style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {[
-                { n: '01', t: 'Discovery', d: 'One deep working session. We map your customer, your competitors, and the one thing your business does better than anyone.' },
-                { n: '02', t: 'Strategy', d: 'A one-page plan you can actually read: what we will do, why, and how we will know it worked.' },
-                { n: '03', t: 'Execution', d: 'We ship weekly. Ads live, content posted, SEO fixes deployed. You see progress every seven days.' },
-                { n: '04', t: 'Optimize', d: 'Monthly report card. What worked, what did not, what we are doubling down on next month.' },
-              ].map(step => (
-                <li key={step.n} style={{
-                  padding: '2rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: '16px',
-                  background: 'var(--surface)',
-                  display: 'flex', gap: '1.5rem',
-                }}>
-                  <span style={{
-                    fontFamily: 'var(--font-display)',
-                    color: 'var(--lime)', fontSize: '1.5rem', fontWeight: 500,
-                    flexShrink: 0,
-                  }}>{step.n}</span>
-                  <div>
-                    <h3 className="display" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{step.t}</h3>
-                    <p style={{ color: 'var(--muted-2)', lineHeight: 1.7 }}>{step.d}</p>
-                  </div>
-                </li>
-              ))}
+            <ol style={{ listStyle: 'none', display: 'flex', flexDirection: 'column' }}>
+              {(() => {
+                const steps = [
+                  { n: '01', t: 'Discovery', d: 'One deep working session. We map your customer, your competitors, and the one thing your business does better than anyone.' },
+                  { n: '02', t: 'Strategy', d: 'A one-page plan you can actually read: what we will do, why, and how we will know it worked.' },
+                  { n: '03', t: 'Execution', d: 'We ship weekly. Ads live, content posted, SEO fixes deployed. You see progress every seven days.' },
+                  { n: '04', t: 'Optimize', d: 'Monthly report card. What worked, what did not, what we are doubling down on next month.' },
+                ]
+                return steps.map((step, i) => (
+                  <ProcessStep
+                    key={step.n}
+                    n={step.n}
+                    title={step.t}
+                    body={step.d}
+                    isLast={i === steps.length - 1}
+                  />
+                ))
+              })()}
             </ol>
           </div>
         </div>
@@ -483,42 +486,3 @@ export default function Home() {
   )
 }
 
-function ServiceCard({ svc, index }) {
-  const cols = 4 // assumption for border logic; harmless if fewer
-  return (
-    <div style={{
-      padding: '2.5rem',
-      borderRight: index < cols - 1 ? '1px solid var(--border)' : 'none',
-      borderBottom: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column', gap: '1.25rem',
-    }}>
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          color: 'var(--lime)', fontSize: '0.9rem', fontWeight: 500,
-        }}>{svc.n}</span>
-        <span style={{ color: 'var(--muted)', fontSize: '1.2rem' }}>→</span>
-      </div>
-      <h3 className="display" style={{ fontSize: '1.65rem' }}>{svc.title}</h3>
-      <p style={{ color: 'var(--muted-2)', fontSize: '0.95rem', lineHeight: 1.65, flexGrow: 1 }}>
-        {svc.body}
-      </p>
-      <ul style={{
-        listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: '0.4rem',
-        paddingTop: '0.5rem', borderTop: '1px solid var(--border)',
-        marginTop: 'auto',
-      }}>
-        {svc.deliverables.map(d => (
-          <li key={d} style={{
-            fontSize: '0.72rem', color: 'var(--muted-2)',
-            padding: '0.25rem 0.65rem',
-            border: '1px solid var(--border)',
-            borderRadius: '999px',
-          }}>{d}</li>
-        ))}
-      </ul>
-    </div>
-  )
-}
