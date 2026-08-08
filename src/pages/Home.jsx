@@ -145,9 +145,11 @@ export default function Home() {
 
         <style>{`
           @media (max-width: 860px) {
-            .hero-grid { grid-template-columns: 1fr !important; }
+            .hero-grid { grid-template-columns: minmax(0, 1fr) !important; }
             .hero-visual { min-height: 320px !important; margin-top: 1rem; }
           }
+          .hero-grid h1 { word-break: break-word; overflow-wrap: anywhere; }
+          .hero-grid h1 > span { overflow-wrap: anywhere; }
         `}</style>
       </section>
 

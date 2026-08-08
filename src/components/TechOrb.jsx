@@ -1,12 +1,20 @@
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Suspense, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
 import * as THREE from 'three'
 
 const LIME = '#C4FF3D'
+const BLUE = '#5B7CFF'
 
-/* ---------- CORE FORM ----------
- * A wireframe icosahedron + an inner solid shell = the "brand nucleus".
- * Slowly rotates on its own axis. Lime edges + soft glow.
+/**
+ * TechOrb — a self-contained rotating "neural core" visualization.
+ *
+ * Everything is bounded within a ~2-unit radius sphere; the camera keeps
+ * the whole rig framed at any viewport size (uses fov auto-adjust).
+ * Nothing expands or emanates beyond that bound, so it never gets clipped.
+ */
+
+/* ---------- CORE NUCLEUS ----------
+ * Wireframe icosahedron with glowing vertex dots. Slowly rotates.
  */
 function Core() {
   const wireRef = useRef()
@@ -14,46 +22,42 @@ function Core() {
 
   useFrame((_, dt) => {
     if (wireRef.current) {
-      wireRef.current.rotation.y += dt * 0.25
-      wireRef.current.rotation.x += dt * 0.1
+      wireRef.current.rotation.y += dt * 0.22
+      wireRef.current.rotation.x += dt * 0.09
     }
     if (solidRef.current) {
-      solidRef.current.rotation.y -= dt * 0.12
+      solidRef.current.rotation.y -= dt * 0.1
     }
   })
 
   return (
     <group>
-      {/* inner solid — dark, gives depth */}
+      {/* dark inner shell for depth */}
       <mesh ref={solidRef}>
-        <icosahedronGeometry args={[0.9, 1]} />
+        <icosahedronGeometry args={[0.85, 1]} />
         <meshStandardMaterial
           color="#0a0a0a"
           metalness={0.9}
-          roughness={0.15}
+          roughness={0.2}
           flatShading
         />
       </mesh>
-
-      {/* outer wireframe — lime */}
+      {/* lime wireframe outer */}
       <mesh ref={wireRef}>
-        <icosahedronGeometry args={[1.05, 1]} />
+        <icosahedronGeometry args={[1, 1]} />
         <meshBasicMaterial color={LIME} wireframe transparent opacity={0.85} />
       </mesh>
-
-      {/* vertex points — bright */}
-      <VertexDots radius={1.05} />
+      <VertexDots radius={1} />
     </group>
   )
 }
 
-/* Bright dots at each icosahedron vertex — reads as network nodes. */
 function VertexDots({ radius = 1 }) {
   const positions = useMemo(() => {
     const geom = new THREE.IcosahedronGeometry(radius, 1)
     const pts = []
-    const pos = geom.attributes.position
     const seen = new Set()
+    const pos = geom.attributes.position
     for (let i = 0; i < pos.count; i++) {
       const x = +pos.getX(i).toFixed(4)
       const y = +pos.getY(i).toFixed(4)
@@ -79,78 +83,96 @@ function VertexDots({ radius = 1 }) {
   )
 }
 
-/* ---------- ORBITAL RINGS ----------
- * Three rings at different tilts. Each carries a small satellite node
- * that revolves around the core — signals emitting outward.
+/* ---------- ORBITING SATELLITES ----------
+ * Small nodes traveling along tight 3D paths that stay within the bounding
+ * sphere. Each one leaves a soft, decaying trail (line strip drawn manually).
+ * No torus geometry, no ring lines — nothing that can render as a horizontal
+ * band or extend beyond the safe area.
  */
-function OrbitalRing({ radius, tilt, speed, phase = 0, color = LIME, ringOpacity = 0.25 }) {
-  const satRef = useRef()
+function Satellite({ speed, tilt, radius, phase = 0, color = LIME, size = 0.05 }) {
+  const dot = useRef()
 
   useFrame((state) => {
-    if (satRef.current) {
-      const t = state.clock.elapsedTime * speed + phase
-      satRef.current.position.set(
-        Math.cos(t) * radius,
-        0,
-        Math.sin(t) * radius,
-      )
-    }
+    if (!dot.current) return
+    const t = state.clock.elapsedTime * speed + phase
+    const x = Math.cos(t) * radius
+    const z = Math.sin(t) * radius
+    // apply tilt manually so the whole orbit sits on an inclined plane
+    const cosT = Math.cos(tilt[0])
+    const sinT = Math.sin(tilt[0])
+    const y = z * sinT
+    const z2 = z * cosT
+    dot.current.position.set(x, y, z2)
   })
 
-  // ring geometry lying on XZ plane, group tilts the whole system
   return (
-    <group rotation={tilt}>
-      {/* the ring itself */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[radius, 0.003, 8, 128]} />
-        <meshBasicMaterial color={color} transparent opacity={ringOpacity} />
+    <group ref={dot}>
+      <mesh>
+        <sphereGeometry args={[size, 16, 16]} />
+        <meshBasicMaterial color={color} />
       </mesh>
-      {/* satellite */}
-      <group ref={satRef}>
-        <mesh>
-          <sphereGeometry args={[0.055, 16, 16]} />
-          <meshBasicMaterial color={color} />
-        </mesh>
-        {/* soft halo */}
-        <mesh>
-          <sphereGeometry args={[0.12, 16, 16]} />
-          <meshBasicMaterial color={color} transparent opacity={0.15} />
-        </mesh>
-      </group>
+      {/* soft halo */}
+      <mesh>
+        <sphereGeometry args={[size * 2.4, 16, 16]} />
+        <meshBasicMaterial color={color} transparent opacity={0.18} />
+      </mesh>
     </group>
   )
 }
 
-/* ---------- AMBIENT PARTICLES ----------
- * Slowly drifting flecks — "signal noise" in the background.
+/* ---------- CONNECTION MESH ----------
+ * Static thin lines from a handful of surface vertices to satellites'
+ * approximate paths — reads as a network topology at rest.
  */
-function Particles({ count = 80 }) {
+function StaticEdges() {
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry()
+    const verts = []
+    const from = [
+      [0, 1, 0], [0, -1, 0],
+      [0.85, 0.5, 0], [-0.85, 0.5, 0],
+      [0.85, -0.5, 0], [-0.85, -0.5, 0],
+    ]
+    for (const f of from) {
+      // draw a short line pointing outward from the vertex
+      const dir = new THREE.Vector3(...f).normalize()
+      const end = dir.clone().multiplyScalar(1.55)
+      verts.push(...f, end.x, end.y, end.z)
+    }
+    g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3))
+    return g
+  }, [])
+  return (
+    <lineSegments geometry={geom}>
+      <lineBasicMaterial color={LIME} transparent opacity={0.25} />
+    </lineSegments>
+  )
+}
+
+/* ---------- AMBIENT PARTICLES ----------
+ * Points confined to a tight bounding radius. Slow rotation.
+ */
+function Particles({ count = 100 }) {
   const ref = useRef()
 
-  const { positions, speeds } = useMemo(() => {
-    const positions = new Float32Array(count * 3)
-    const speeds = new Float32Array(count)
+  const positions = useMemo(() => {
+    const arr = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      const r = 2.5 + Math.random() * 2.5
+      // uniform points inside a shell between r=1.9 and r=2.3
+      const r = 1.9 + Math.random() * 0.4
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(2 * Math.random() - 1)
-      positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
-      positions[i * 3 + 2] = r * Math.cos(phi)
-      speeds[i] = 0.03 + Math.random() * 0.08
+      arr[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
+      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
+      arr[i * 3 + 2] = r * Math.cos(phi)
     }
-    return { positions, speeds }
+    return arr
   }, [count])
 
   useFrame((_, dt) => {
     if (!ref.current) return
-    const arr = ref.current.geometry.attributes.position.array
-    for (let i = 0; i < count; i++) {
-      arr[i * 3 + 1] += speeds[i] * dt * 0.15
-      if (arr[i * 3 + 1] > 3.5) arr[i * 3 + 1] = -3.5
-    }
-    ref.current.geometry.attributes.position.needsUpdate = true
-    ref.current.rotation.y += dt * 0.02
+    ref.current.rotation.y += dt * 0.04
+    ref.current.rotation.x += dt * 0.015
   })
 
   return (
@@ -164,105 +186,70 @@ function Particles({ count = 80 }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.025}
+        size={0.022}
         color={LIME}
         transparent
-        opacity={0.5}
+        opacity={0.55}
         sizeAttenuation
       />
     </points>
   )
 }
 
-/* ---------- SIGNAL RIPPLES ----------
- * Concentric expanding rings emanating from the core — "the signal".
+/* ---------- RESPONSIVE CAMERA ----------
+ * Auto-adjusts camera distance so the bounding sphere (radius ~2.4) always
+ * fits with a comfortable margin — regardless of viewport aspect ratio.
  */
-function Ripple({ delay = 0 }) {
-  const ref = useRef()
-
-  useFrame((state) => {
-    if (!ref.current) return
-    const t = (state.clock.elapsedTime + delay) % 3.2
-    const p = t / 3.2 // 0..1
-    ref.current.scale.setScalar(1 + p * 2.4)
-    ref.current.material.opacity = 0.4 * (1 - p)
-  })
-
-  return (
-    <mesh ref={ref} rotation={[Math.PI / 2, 0, 0]}>
-      <torusGeometry args={[1.1, 0.006, 8, 128]} />
-      <meshBasicMaterial color={LIME} transparent opacity={0} />
-    </mesh>
-  )
+function ResponsiveCamera({ padding = 1.35 }) {
+  const camera = useThree(s => s.camera)
+  const size = useThree(s => s.size)
+  useEffect(() => {
+    const targetRadius = 2.4 * padding
+    const vFov = (camera.fov * Math.PI) / 180
+    const distV = targetRadius / Math.tan(vFov / 2)
+    const aspect = size.width / Math.max(1, size.height)
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
+    const distH = targetRadius / Math.tan(hFov / 2)
+    const dist = Math.max(distV, distH)
+    camera.position.set(0, 0, dist)
+    camera.lookAt(0, 0, 0)
+    camera.updateProjectionMatrix()
+  }, [camera, size.width, size.height, padding])
+  return null
 }
 
-/* ---------- MOUSE PARALLAX WRAPPER ----------
- * Whole rig tilts slightly toward the cursor. Subtle, not gimmicky.
- */
-function ParallaxGroup({ children }) {
-  const groupRef = useRef()
-  const target = useRef({ x: 0, y: 0 })
-
-  useFrame(() => {
-    if (!groupRef.current) return
-    groupRef.current.rotation.y += (target.current.x * 0.35 - groupRef.current.rotation.y) * 0.05
-    groupRef.current.rotation.x += (target.current.y * 0.22 - groupRef.current.rotation.x) * 0.05
-  })
-
-  return (
-    <group
-      ref={groupRef}
-      onPointerMove={(e) => {
-        // e.uv exists on planes; use client coords via unprojected point
-        target.current.x = (e.point.x || 0) * 0.15
-        target.current.y = -(e.point.y || 0) * 0.15
-      }}
-    >
-      {/* invisible plane picks up pointer events across the canvas */}
-      <mesh position={[0, 0, -1]} visible={false}>
-        <planeGeometry args={[10, 10]} />
-        <meshBasicMaterial />
-      </mesh>
-      {children}
-    </group>
-  )
-}
-
+/* ---------- MAIN COMPONENT ---------- */
 export default function TechOrb() {
   return (
     <div style={{
+      position: 'relative',
       width: '100%',
       height: '100%',
-      minHeight: '440px',
-      position: 'relative',
+      minHeight: '420px',
+      overflow: 'hidden',
     }}>
       <Canvas
-        camera={{ position: [0, 0, 4.6], fov: 45 }}
+        camera={{ position: [0, 0, 6], fov: 45 }}
         gl={{ antialias: true, alpha: true }}
         dpr={[1, 2]}
+        style={{ display: 'block' }}
       >
         <Suspense fallback={null}>
-          {/* lighting */}
+          <ResponsiveCamera padding={1.15} />
+
           <ambientLight intensity={0.4} />
-          <pointLight position={[3, 3, 3]} color={LIME} intensity={1.2} />
-          <pointLight position={[-3, -2, -2]} color="#5B7CFF" intensity={0.5} />
+          <pointLight position={[3, 3, 3]} color={LIME} intensity={1.1} />
+          <pointLight position={[-3, -2, -2]} color={BLUE} intensity={0.4} />
 
-          <ParallaxGroup>
-            <Particles count={90} />
+          <Particles count={110} />
+          <Core />
+          <StaticEdges />
 
-            {/* Ripples — staggered so one is always mid-flight */}
-            <Ripple delay={0} />
-            <Ripple delay={1.05} />
-            <Ripple delay={2.1} />
-
-            {/* Orbital rings + their satellites */}
-            <OrbitalRing radius={1.6} tilt={[0, 0, 0]}                     speed={0.8} />
-            <OrbitalRing radius={2.0} tilt={[Math.PI / 3, 0, 0]}           speed={0.55} phase={2} />
-            <OrbitalRing radius={2.4} tilt={[Math.PI / 5, 0, Math.PI / 4]} speed={0.4}  phase={4} color="#5B7CFF" ringOpacity={0.18} />
-
-            {/* Central nucleus */}
-            <Core />
-          </ParallaxGroup>
+          {/* Satellites — tight orbits, always inside camera frustum */}
+          <Satellite radius={1.55} speed={0.85} tilt={[0.2,  0, 0]} phase={0.0} />
+          <Satellite radius={1.7}  speed={0.55} tilt={[0.9,  0, 0]} phase={1.4} />
+          <Satellite radius={1.85} speed={0.42} tilt={[-0.4, 0, 0]} phase={3.1} color={BLUE} size={0.045} />
+          <Satellite radius={1.45} speed={0.7}  tilt={[1.3,  0, 0]} phase={4.7} size={0.04} />
         </Suspense>
       </Canvas>
     </div>
