@@ -3,6 +3,11 @@ import { motion } from 'framer-motion'
 import Aurora from '../components/Aurora'
 import TechOrb from '../components/TechOrb'
 import RotatingWord from '../components/RotatingWord'
+import MagneticLink from '../components/MagneticLink'
+import RevealText from '../components/RevealText'
+import Counter from '../components/Counter'
+import DotField from '../components/DotField'
+import TiltCard from '../components/TiltCard'
 import { useSEO } from '../hooks/useSEO'
 
 const capabilities = [
@@ -39,10 +44,10 @@ const services = [
 ]
 
 const stats = [
-  { value: '3', suffix: ' countries', label: 'India, USA, UAE' },
-  { value: '10+', suffix: '', label: 'Projects shipped' },
-  { value: '24h', suffix: '', label: 'Reply time' },
-  { value: '100%', suffix: '', label: 'Client retention' },
+  { to: 3,   suffix: ' countries', label: 'India, USA, UAE',    accent: '' },
+  { to: 10,  suffix: '+',           label: 'Projects shipped',   accent: '' },
+  { to: 24,  suffix: 'h',           label: 'Reply time',         accent: '' },
+  { to: 100, suffix: '%',           label: 'Client retention',   accent: '' },
 ]
 
 export default function Home() {
@@ -119,12 +124,12 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.25 }}
               style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}
             >
-              <Link to="/contact" className="btn-primary">
+              <MagneticLink to="/contact" className="btn-primary">
                 Start a project <span style={{ fontSize: '1.1rem' }}>→</span>
-              </Link>
-              <Link to="/work" className="btn-ghost">
+              </MagneticLink>
+              <MagneticLink to="/work" className="btn-ghost">
                 See our work
-              </Link>
+              </MagneticLink>
             </motion.div>
           </div>
 
@@ -198,7 +203,8 @@ export default function Home() {
                   color: 'var(--white)',
                   marginBottom: '0.5rem',
                 }}>
-                  {s.value}<span style={{ color: 'var(--lime)' }}>{s.suffix}</span>
+                  <Counter to={s.to} duration={1.8} />
+                  <span style={{ color: 'var(--lime)' }}>{s.suffix}</span>
                 </div>
                 <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{s.label}</p>
               </div>
@@ -216,16 +222,20 @@ export default function Home() {
           }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: '1rem' }}>What we do</p>
-              <h2 className="display" style={{
-                fontSize: 'clamp(2rem, 5vw, 4rem)',
-                maxWidth: '18ch',
-              }}>
+              <RevealText
+                as="h2"
+                className="display"
+                style={{
+                  fontSize: 'clamp(2rem, 5vw, 4rem)',
+                  maxWidth: '18ch',
+                }}
+              >
                 Four disciplines, one team, everything under one roof.
-              </h2>
+              </RevealText>
             </div>
-            <Link to="/services" className="btn-ghost">
+            <MagneticLink to="/services" className="btn-ghost">
               All services
-            </Link>
+            </MagneticLink>
           </div>
 
           <div style={{
@@ -254,12 +264,16 @@ export default function Home() {
           }}>
             <div style={{ position: 'sticky', top: '6rem' }}>
               <p className="eyebrow" style={{ marginBottom: '1rem' }}>How we work</p>
-              <h2 className="display" style={{
-                fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
-                marginBottom: '1.75rem',
-              }}>
+              <RevealText
+                as="h2"
+                className="display"
+                style={{
+                  fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
+                  marginBottom: '1.75rem',
+                }}
+              >
                 No fluff. Just work that moves the number that matters.
-              </h2>
+              </RevealText>
               <p style={{ color: 'var(--muted-2)', maxWidth: '440px', lineHeight: 1.75 }}>
                 Every engagement starts with one question: what is the KPI you actually get paid on?
                 We work backwards from there. No dashboards nobody reads. No 60-page decks. Just weekly
@@ -297,14 +311,54 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== INTERACTIVE DOT FIELD ===== */}
+      <section style={{
+        position: 'relative',
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+      }}>
+        <DotField
+          spacing={30}
+          dotRadius={1.5}
+          repel={110}
+          strength={90}
+          height="clamp(420px, 60vh, 620px)"
+        >
+          <div style={{ maxWidth: '720px' }}>
+            <p className="eyebrow" style={{ marginBottom: '1rem' }}>Move your mouse</p>
+            <RevealText
+              as="h2"
+              className="display"
+              style={{
+                fontSize: 'clamp(2rem, 5.5vw, 4rem)',
+                marginBottom: '1.25rem',
+              }}
+            >
+              We move audiences the same way.
+            </RevealText>
+            <p style={{
+              color: 'var(--muted-2)', fontSize: '1.05rem', lineHeight: 1.7,
+              maxWidth: '520px', margin: '0 auto',
+            }}>
+              Every strategy we ship starts with one force acting on a system.
+              That's not a metaphor — that's paid ads, that's SEO, that's content.
+            </p>
+          </div>
+        </DotField>
+      </section>
+
       {/* ===== FEATURED WORK ===== */}
       <section className="section" style={{ background: 'var(--surface)' }}>
         <div className="container">
           <div style={{ marginBottom: '3rem' }}>
             <p className="eyebrow" style={{ marginBottom: '1rem' }}>Recent work</p>
-            <h2 className="display" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
+            <RevealText
+              as="h2"
+              className="display"
+              style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}
+            >
               A few we're proud of.
-            </h2>
+            </RevealText>
           </div>
 
           <div style={{
@@ -317,42 +371,38 @@ export default function Home() {
               { flag: 'AE', loc: 'Dubai, UAE', client: 'Firefinch Technologies', tag: 'Brand · Web', result: 'Full brand + product site launch' },
               { flag: 'US', loc: 'Nebraska, USA', client: 'Hindu Temple Nebraska', tag: 'Custom Software', result: 'Automated 100+ hrs of manual work' },
             ].map(w => (
-              <Link key={w.client} to="/work" style={{
-                display: 'block',
+              <TiltCard key={w.client} style={{
                 background: 'var(--surface-2)',
                 border: '1px solid var(--border)',
                 borderRadius: '18px',
-                padding: '2rem',
-                transition: 'border-color 0.2s, transform 0.2s',
-              }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'var(--lime)'
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--border)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                <div style={{
-                  display: 'flex', gap: '0.5rem', alignItems: 'center',
-                  color: 'var(--muted)', fontSize: '0.8rem', marginBottom: '2rem',
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                overflow: 'hidden',
+              }}>
+                <Link to="/work" style={{
+                  display: 'block',
+                  padding: '2rem',
+                  position: 'relative',
+                  zIndex: 1,
                 }}>
-                  <span>{w.flag}</span>
-                  <span>·</span>
-                  <span>{w.loc}</span>
-                </div>
-                <h3 className="display" style={{ fontSize: '1.65rem', marginBottom: '0.5rem' }}>
-                  {w.client}
-                </h3>
-                <p style={{ color: 'var(--lime)', fontSize: '0.85rem', marginBottom: '2.5rem' }}>
-                  {w.tag}
-                </p>
-                <p style={{ color: 'var(--muted-2)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                  {w.result}
-                </p>
-              </Link>
+                  <div style={{
+                    display: 'flex', gap: '0.5rem', alignItems: 'center',
+                    color: 'var(--muted)', fontSize: '0.8rem', marginBottom: '2rem',
+                    letterSpacing: '0.1em', textTransform: 'uppercase',
+                  }}>
+                    <span>{w.flag}</span>
+                    <span>·</span>
+                    <span>{w.loc}</span>
+                  </div>
+                  <h3 className="display" style={{ fontSize: '1.65rem', marginBottom: '0.5rem' }}>
+                    {w.client}
+                  </h3>
+                  <p style={{ color: 'var(--lime)', fontSize: '0.85rem', marginBottom: '2.5rem' }}>
+                    {w.tag}
+                  </p>
+                  <p style={{ color: 'var(--muted-2)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                    {w.result}
+                  </p>
+                </Link>
+              </TiltCard>
             ))}
           </div>
         </div>
@@ -389,13 +439,17 @@ export default function Home() {
       <section className="section" style={{ background: 'var(--surface)' }}>
         <div className="container">
           <p className="eyebrow" style={{ marginBottom: '1rem' }}>Global reach</p>
-          <h2 className="display" style={{
-            fontSize: 'clamp(2rem, 5vw, 4rem)',
-            maxWidth: '20ch',
-            marginBottom: '3rem',
-          }}>
+          <RevealText
+            as="h2"
+            className="display"
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 4rem)',
+              maxWidth: '20ch',
+              marginBottom: '3rem',
+            }}
+          >
             Headquartered in Vizag. Trusted by businesses in three countries.
-          </h2>
+          </RevealText>
 
           <div style={{
             display: 'grid',
@@ -407,7 +461,7 @@ export default function Home() {
               { region: 'United States', city: 'Omaha, Nebraska', note: 'Restaurants, temples, and community organizations.' },
               { region: 'United Arab Emirates', city: 'Dubai', note: 'Technology companies and B2B brand work.' },
             ].map(r => (
-              <div key={r.region} style={{
+              <TiltCard key={r.region} style={{
                 padding: '2rem',
                 background: 'var(--surface-2)',
                 border: '1px solid var(--border)',
@@ -420,7 +474,7 @@ export default function Home() {
                 }}>{r.region}</p>
                 <h3 className="display" style={{ fontSize: '1.4rem', marginBottom: '0.75rem' }}>{r.city}</h3>
                 <p style={{ color: 'var(--muted-2)', fontSize: '0.9rem', lineHeight: 1.65 }}>{r.note}</p>
-              </div>
+              </TiltCard>
             ))}
           </div>
         </div>
