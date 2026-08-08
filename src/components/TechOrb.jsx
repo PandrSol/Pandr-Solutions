@@ -218,16 +218,71 @@ function ResponsiveCamera({ padding = 1.35 }) {
   return null
 }
 
+/* ---------- CURSOR-DRIVEN RIG ----------
+ * Whole rig tilts toward the cursor with spring physics. Uses a shared
+ * ref updated on pointer move so the useFrame loop stays independent
+ * of React re-renders.
+ */
+function InteractiveRig({ pointer, children }) {
+  const groupRef = useRef()
+
+  useFrame((_, dt) => {
+    if (!groupRef.current) return
+    // spring toward target angles
+    const t = pointer.current
+    const cx = groupRef.current.rotation.x
+    const cy = groupRef.current.rotation.y
+    // ease with dt-aware lerp
+    const k = 1 - Math.pow(0.0004, dt)
+    groupRef.current.rotation.x = cx + (t.rx - cx) * k
+    groupRef.current.rotation.y = cy + (t.ry - cy) * k
+    // scale slightly on active
+    const targetScale = 1 + t.active * 0.06
+    const cs = groupRef.current.scale.x
+    groupRef.current.scale.setScalar(cs + (targetScale - cs) * k)
+  })
+
+  return <group ref={groupRef}>{children}</group>
+}
+
 /* ---------- MAIN COMPONENT ---------- */
 export default function TechOrb() {
+  const wrapRef = useRef(null)
+  const pointer = useRef({ rx: 0, ry: 0, active: 0 })
+
+  const onMove = (e) => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const r = wrap.getBoundingClientRect()
+    const nx = ((e.clientX - r.left) / r.width - 0.5) * 2  // -1..1
+    const ny = ((e.clientY - r.top) / r.height - 0.5) * 2
+    // Map to reasonable rotation ranges
+    pointer.current.ry = nx * 0.6   // horizontal cursor rotates around Y
+    pointer.current.rx = ny * 0.4   // vertical cursor rotates around X (inverted feels natural)
+    pointer.current.active = 1
+  }
+
+  const onLeave = () => {
+    pointer.current.rx = 0
+    pointer.current.ry = 0
+    pointer.current.active = 0
+  }
+
   return (
-    <div style={{
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      minHeight: '420px',
-      overflow: 'hidden',
-    }}>
+    <div
+      ref={wrapRef}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        minHeight: '420px',
+        overflow: 'hidden',
+        cursor: 'grab',
+      }}
+      data-cursor="hover"
+    >
       <Canvas
         camera={{ position: [0, 0, 6], fov: 45 }}
         gl={{ antialias: true, alpha: true }}
@@ -242,14 +297,17 @@ export default function TechOrb() {
           <pointLight position={[-3, -2, -2]} color={BLUE} intensity={0.4} />
 
           <Particles count={110} />
-          <Core />
-          <StaticEdges />
 
-          {/* Satellites — tight orbits, always inside camera frustum */}
-          <Satellite radius={1.55} speed={0.85} tilt={[0.2,  0, 0]} phase={0.0} />
-          <Satellite radius={1.7}  speed={0.55} tilt={[0.9,  0, 0]} phase={1.4} />
-          <Satellite radius={1.85} speed={0.42} tilt={[-0.4, 0, 0]} phase={3.1} color={BLUE} size={0.045} />
-          <Satellite radius={1.45} speed={0.7}  tilt={[1.3,  0, 0]} phase={4.7} size={0.04} />
+          <InteractiveRig pointer={pointer}>
+            <Core />
+            <StaticEdges />
+
+            {/* Satellites — tight orbits, always inside camera frustum */}
+            <Satellite radius={1.55} speed={0.85} tilt={[0.2,  0, 0]} phase={0.0} />
+            <Satellite radius={1.7}  speed={0.55} tilt={[0.9,  0, 0]} phase={1.4} />
+            <Satellite radius={1.85} speed={0.42} tilt={[-0.4, 0, 0]} phase={3.1} color={BLUE} size={0.045} />
+            <Satellite radius={1.45} speed={0.7}  tilt={[1.3,  0, 0]} phase={4.7} size={0.04} />
+          </InteractiveRig>
         </Suspense>
       </Canvas>
     </div>

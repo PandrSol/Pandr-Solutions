@@ -1,5 +1,5 @@
 import { NavLink, useLocation, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const links = [
   { to: '/',         label: 'Home',     end: true },
@@ -8,17 +8,25 @@ const links = [
   { to: '/contact',  label: 'Contact' },
 ]
 
+const tickerMessages = [
+  'Now booking projects for Q4 2025',
+  'A tight studio, working across US · UAE · India',
+  'Local SEO. Paid ads. Social. Web.',
+  'Reply within 1 business day, every day',
+]
+
 /**
- * Navbar — clean editorial nav with a slide-up dual-text hover on links,
- * a live availability chip, and a filled pill CTA.
- *
- * The slide-up pattern is a single word rendered twice, stacked; on hover
- * the top copy translates up-and-out while the bottom copy translates
- * up-and-into-place, all in one 0.45s ease. No layout shift, no jank.
+ * Navbar — a two-tier "command bar" header:
+ *  · Thin ticker strip on top: rotating brand status message, subtle
+ *    lime accent, fades between messages every 4s.
+ *  · Main bar: pulsing-P logo, nav with a floating lime highlight that
+ *    springs between hovered items, IST live clock, rotating "Available"
+ *    sticker, filled pill CTA.
  */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [ticker, setTicker] = useState(0)
   const location = useLocation()
 
   useEffect(() => {
@@ -30,73 +38,80 @@ export default function Navbar() {
 
   useEffect(() => setOpen(false), [location])
 
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTicker(i => (i + 1) % tickerMessages.length)
+    }, 4200)
+    return () => clearInterval(t)
+  }, [])
+
   return (
     <>
+      {/* Fixed header container */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '1rem 0',
-        background: scrolled ? 'rgba(0,0,0,0.72)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(24px) saturate(160%)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(24px) saturate(160%)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
-        transition: 'background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease',
+        background: scrolled ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(24px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+        borderBottom: scrolled ? '1px solid var(--border)' : '1px solid rgba(255,255,255,0.04)',
+        transition: 'background 0.35s ease, border-color 0.35s ease',
       }}>
-        <div className="container" style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: '2rem',
+        {/* ===== TICKER STRIP ===== */}
+        <div style={{
+          borderBottom: '1px solid var(--border)',
+          padding: '0.4rem 0',
+          overflow: 'hidden',
         }}>
-          {/* Logo */}
-          <Link to="/" aria-label="Pandr Solutions Home" style={{
-            display: 'inline-flex', alignItems: 'center',
+          <div className="container" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: '2rem',
           }}>
-            <img
-              src="/pandr-logo.jpg"
-              alt="Pandr Solutions"
-              style={{
-                height: 32, width: 'auto', display: 'block',
-                transition: 'filter 0.3s ease, transform 0.3s ease',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.filter = 'brightness(1.15)'
-                e.currentTarget.style.transform = 'scale(1.03)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.filter = 'none'
-                e.currentTarget.style.transform = 'none'
-              }}
-            />
-          </Link>
-
-          {/* Desktop nav */}
-          <nav className="desktop-nav" style={{
-            display: 'flex', alignItems: 'center', gap: '2.5rem',
-          }}>
-            {links.map(({ to, label, end }) => (
-              <SlideLink key={to} to={to} label={label} end={end} />
-            ))}
-          </nav>
-
-          {/* Right cluster — availability chip + CTA */}
-          <div className="desktop-nav" style={{
-            display: 'flex', alignItems: 'center', gap: '1rem',
-          }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '999px',
-              border: '1px solid var(--border-strong)',
-              fontSize: '0.72rem',
-              letterSpacing: '0.05em',
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.6rem',
+              fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'var(--muted-2)',
+              flex: 1, minWidth: 0,
             }}>
               <span style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: 'var(--lime)',
-                boxShadow: '0 0 8px rgba(196,255,61,0.7)',
-                animation: 'availability-pulse 2.4s ease-in-out infinite',
+                boxShadow: '0 0 10px rgba(196,255,61,0.8)',
+                animation: 'live-pulse 2s ease-in-out infinite',
+                flexShrink: 0,
               }} />
-              Available
-            </span>
+              <span style={{ color: 'var(--lime)', flexShrink: 0 }}>Live</span>
+              <span style={{ color: 'var(--border-strong)', flexShrink: 0 }}>·</span>
+              <TickerLine index={ticker} messages={tickerMessages} />
+            </div>
+            <div className="desktop-nav" style={{
+              display: 'flex', alignItems: 'center', gap: '1rem',
+              fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase',
+              color: 'var(--muted)',
+            }}>
+              <LiveClock />
+              <span>·</span>
+              <span>VIZ / IN</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== MAIN BAR ===== */}
+        <div className="container" style={{
+          padding: '0.85rem 0',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '1.5rem',
+        }}>
+          {/* Logo with pulsing "live" halo */}
+          <PulseLogo />
+
+          {/* Nav with floating cursor spotlight */}
+          <FloatingNav className="desktop-nav" />
+
+          {/* Right cluster: rotating sticker + CTA */}
+          <div className="desktop-nav" style={{
+            display: 'flex', alignItems: 'center', gap: '1rem',
+          }}>
+            <RotatingSticker />
             <PillCTA to="/contact">Start a project</PillCTA>
           </div>
 
@@ -158,80 +173,237 @@ export default function Navbar() {
           .desktop-nav { display: none !important; }
           .hamburger { display: flex !important; }
         }
-        @keyframes availability-pulse {
-          0%, 100% { opacity: 1; }
-          50%      { opacity: 0.55; }
+        @keyframes live-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.5; transform: scale(0.85); }
         }
-        .slide-link .slide-link-stack { transform: translateY(0); }
-        .slide-link:hover .slide-link-stack { transform: translateY(-1.4em); }
+        @keyframes sticker-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes logo-halo {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50%      { transform: scale(1.35); opacity: 0; }
+        }
       `}</style>
     </>
   )
 }
 
-/* ---------- Slide-up dual-text nav link ---------- */
-function SlideLink({ to, label, end }) {
+/* ---------- TICKER MESSAGE ---------- */
+function TickerLine({ index, messages }) {
   return (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) => (isActive ? 'slide-link active' : 'slide-link')}
-    >
-      {({ isActive }) => (
+    <span style={{
+      position: 'relative',
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      minWidth: 0,
+      flex: 1,
+    }}>
+      {messages.map((msg, i) => (
         <span
-          className="slide-link-inner"
+          key={i}
           style={{
-            position: 'relative',
-            display: 'inline-block',
-            overflow: 'hidden',
-            height: '1.4em',
-            lineHeight: '1.4em',
-            verticalAlign: 'bottom',
+            position: i === index ? 'relative' : 'absolute',
+            left: 0, top: 0,
+            color: 'var(--text)',
+            opacity: i === index ? 1 : 0,
+            transform: i === index ? 'translateY(0)' : 'translateY(6px)',
+            transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
-        >
-          {/* stack of two copies; on hover translate the whole stack up by one line */}
-          <span
-            className="slide-link-stack"
-            style={{
-              display: 'inline-block',
-              transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.15, 1)',
-              willChange: 'transform',
-            }}
-          >
-            <span style={{
-              display: 'block',
-              color: isActive ? 'var(--lime)' : 'var(--white)',
-              fontWeight: 500, fontSize: '0.9rem',
-              letterSpacing: '-0.01em',
-            }}>{label}</span>
-            <span style={{
-              display: 'block',
-              color: 'var(--lime)',
-              fontWeight: 500, fontSize: '0.9rem',
-              letterSpacing: '-0.01em',
-            }}>{label}</span>
-          </span>
-          {/* active-state indicator: small lime dot underneath */}
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              bottom: 4, left: '50%',
-              width: 3, height: 3,
-              borderRadius: '50%',
-              background: 'var(--lime)',
-              transform: `translateX(-50%) scale(${isActive ? 1 : 0})`,
-              transition: 'transform 0.3s ease',
-              boxShadow: isActive ? '0 0 8px var(--lime)' : 'none',
-            }}
-          />
-        </span>
-      )}
-    </NavLink>
+        >{msg}</span>
+      ))}
+    </span>
   )
 }
 
-/* ---------- Pill CTA ---------- */
+/* ---------- LIVE CLOCK (IST) ---------- */
+function LiveClock() {
+  const [time, setTime] = useState(() => formatIST(new Date()))
+  useEffect(() => {
+    const t = setInterval(() => setTime(formatIST(new Date())), 1000)
+    return () => clearInterval(t)
+  }, [])
+  return <span style={{ color: 'var(--text)' }}>{time}</span>
+}
+
+function formatIST(date) {
+  const ist = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+  const h = ist.getHours().toString().padStart(2, '0')
+  const m = ist.getMinutes().toString().padStart(2, '0')
+  const s = ist.getSeconds().toString().padStart(2, '0')
+  return `${h}:${m}:${s} IST`
+}
+
+/* ---------- LOGO WITH PULSING HALO ---------- */
+function PulseLogo() {
+  return (
+    <Link to="/" aria-label="Pandr Solutions Home" style={{
+      display: 'inline-flex', alignItems: 'center', gap: '0.65rem',
+      position: 'relative',
+    }}>
+      <img
+        src="/pandr-logo.jpg"
+        alt="Pandr Solutions"
+        style={{
+          height: 32, width: 'auto', display: 'block',
+          transition: 'filter 0.3s ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.15)' }}
+        onMouseLeave={e => { e.currentTarget.style.filter = 'none' }}
+      />
+      {/* pulsing halo dot next to the logo */}
+      <span style={{
+        position: 'relative',
+        width: 6, height: 6, borderRadius: '50%',
+        background: 'var(--lime)',
+        display: 'inline-block',
+      }}>
+        <span aria-hidden="true" style={{
+          position: 'absolute', inset: -2,
+          borderRadius: '50%',
+          background: 'var(--lime)',
+          animation: 'logo-halo 2.2s ease-out infinite',
+        }} />
+      </span>
+    </Link>
+  )
+}
+
+/* ---------- FLOATING NAV: cursor spotlight that springs between items ---------- */
+function FloatingNav({ className }) {
+  const wrapRef = useRef(null)
+  const [rect, setRect] = useState({ x: 0, w: 0, opacity: 0 })
+  const [activeRect, setActiveRect] = useState({ x: 0, w: 0 })
+  const location = useLocation()
+
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const active = wrap.querySelector('a.active')
+    if (active) {
+      const wRect = wrap.getBoundingClientRect()
+      const aRect = active.getBoundingClientRect()
+      setActiveRect({ x: aRect.left - wRect.left, w: aRect.width })
+      setRect({ x: aRect.left - wRect.left, w: aRect.width, opacity: 1 })
+    }
+  }, [location.pathname])
+
+  const onEnter = (e) => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const r = e.currentTarget.getBoundingClientRect()
+    const wRect = wrap.getBoundingClientRect()
+    setRect({ x: r.left - wRect.left, w: r.width, opacity: 1 })
+  }
+  const onLeave = () => {
+    setRect({ x: activeRect.x, w: activeRect.w, opacity: activeRect.w ? 1 : 0 })
+  }
+
+  return (
+    <nav
+      ref={wrapRef}
+      className={className}
+      style={{
+        position: 'relative',
+        display: 'flex', alignItems: 'center', gap: '0.25rem',
+      }}
+    >
+      {/* Floating lime bar underneath */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: '-2px',
+          left: 0,
+          transform: `translateX(${rect.x}px)`,
+          width: rect.w,
+          height: 2,
+          background: 'var(--lime)',
+          borderRadius: '2px',
+          opacity: rect.opacity,
+          transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
+          pointerEvents: 'none',
+          boxShadow: '0 0 12px rgba(196,255,61,0.6)',
+        }}
+      />
+
+      {links.map(({ to, label, end }) => (
+        <NavLink
+          key={to}
+          to={to}
+          end={end}
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
+          className={({ isActive }) => (isActive ? 'active' : undefined)}
+          style={({ isActive }) => ({
+            padding: '0.5rem 1rem',
+            fontSize: '0.88rem',
+            fontWeight: 500,
+            color: isActive ? 'var(--white)' : 'var(--muted-2)',
+            transition: 'color 0.3s ease',
+            whiteSpace: 'nowrap',
+          })}
+        >
+          {label}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
+
+/* ---------- ROTATING STICKER ---------- */
+function RotatingSticker() {
+  const text = 'AVAILABLE FOR PROJECTS · '.repeat(2)
+  const chars = text.split('')
+  const angleStep = 360 / chars.length
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: 56, height: 56,
+      flexShrink: 0,
+    }}>
+      <svg
+        viewBox="0 0 100 100"
+        style={{
+          width: '100%', height: '100%',
+          animation: 'sticker-spin 14s linear infinite',
+        }}
+      >
+        <defs>
+          <path
+            id="sticker-arc"
+            d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"
+            fill="none"
+          />
+        </defs>
+        <text fill="var(--white)" style={{
+          fontSize: '10px',
+          fontFamily: 'var(--font-display)',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+        }}>
+          <textPath href="#sticker-arc">
+            {text}
+          </textPath>
+        </text>
+      </svg>
+      {/* center dot */}
+      <span style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: 6, height: 6, borderRadius: '50%',
+        background: 'var(--lime)',
+        transform: 'translate(-50%, -50%)',
+        boxShadow: '0 0 10px rgba(196,255,61,0.8)',
+      }} />
+    </div>
+  )
+}
+
+/* ---------- CTA ---------- */
 function PillCTA({ to, children }) {
   return (
     <Link
@@ -249,7 +421,7 @@ function PillCTA({ to, children }) {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(196,255,61,0.25)'
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(196,255,61,0.28)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'none'
