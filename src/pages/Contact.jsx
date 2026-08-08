@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Aurora from '../components/Aurora'
+import RevealText from '../components/RevealText'
+import MagneticLink from '../components/MagneticLink'
 import { useSEO } from '../hooks/useSEO'
 
 const budgets = ['< $2k', '$2k – $5k', '$5k – $10k', '$10k+']
@@ -79,17 +81,12 @@ export default function Contact() {
             className="eyebrow" style={{ marginBottom: '2rem' }}>
             Contact
           </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="display"
-            style={{
-              fontSize: 'clamp(2.5rem, 7vw, 6rem)',
-              maxWidth: '15ch', marginBottom: '2rem',
-            }}
-          >
-            Let's build something <span style={{ color: 'var(--lime)' }}>together</span>.
-          </motion.h1>
+          <RevealText as="h1" className="display" style={{
+            fontSize: 'clamp(2.5rem, 7vw, 6rem)',
+            maxWidth: '15ch', marginBottom: '2rem',
+          }}>
+            Let's build something together.
+          </RevealText>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -258,12 +255,12 @@ export default function Contact() {
           }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: '1rem' }}>Frequently asked</p>
-              <h2 className="display" style={{
+              <RevealText as="h2" className="display" style={{
                 fontSize: 'clamp(2rem, 5vw, 3.5rem)',
                 marginBottom: '1.5rem',
               }}>
                 Answers before you ask.
-              </h2>
+              </RevealText>
               <p style={{ color: 'var(--muted-2)', lineHeight: 1.7, maxWidth: '420px' }}>
                 A few things people ask on the first call. If your question is not here,
                 write it into the form above.
@@ -272,9 +269,10 @@ export default function Contact() {
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {faqs.map((f, i) => (
-                <details key={i} style={{
+                <details key={i} className="faq-item" style={{
                   borderBottom: '1px solid var(--border)',
                   padding: '1.5rem 0',
+                  transition: 'padding 0.3s ease',
                 }}>
                   <summary style={{
                     cursor: 'pointer',
@@ -284,11 +282,14 @@ export default function Contact() {
                     listStyle: 'none',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     gap: '1rem',
+                    transition: 'color 0.25s ease',
                   }}>
-                    {f.q}
-                    <span style={{
+                    <span className="faq-q">{f.q}</span>
+                    <span className="faq-icon" style={{
                       color: 'var(--lime)', fontSize: '1.5rem',
                       lineHeight: 1, flexShrink: 0,
+                      transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                      display: 'inline-block',
                     }}>+</span>
                   </summary>
                   <p style={{
@@ -304,7 +305,9 @@ export default function Contact() {
 
       <style>{`
         details summary::-webkit-details-marker { display: none; }
-        details[open] summary span { transform: rotate(45deg); transition: transform 0.2s; }
+        details[open] .faq-icon { transform: rotate(45deg); }
+        .faq-item:hover .faq-q { color: var(--lime); }
+        .faq-q { transition: color 0.25s ease; }
         @media (max-width: 860px) {
           .contact-grid { grid-template-columns: 1fr !important; }
         }

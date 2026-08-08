@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Aurora from '../components/Aurora'
+import MagneticLink from '../components/MagneticLink'
+import RevealText from '../components/RevealText'
+import TiltCard from '../components/TiltCard'
 import { useSEO } from '../hooks/useSEO'
+import { useRef } from 'react'
 
 const services = [
   {
@@ -99,17 +102,16 @@ export default function Services() {
             className="eyebrow" style={{ marginBottom: '2rem' }}>
             Services & About
           </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+          <RevealText
+            as="h1"
             className="display"
             style={{
               fontSize: 'clamp(2.5rem, 7vw, 6rem)',
               maxWidth: '16ch', marginBottom: '2rem',
             }}
           >
-            A studio built to <span style={{ color: 'var(--lime)' }}>ship</span>, not to sell decks.
-          </motion.h1>
+            A studio built to ship, not to sell decks.
+          </RevealText>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -135,12 +137,12 @@ export default function Services() {
           }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: '1.25rem' }}>About Pandr</p>
-              <h2 className="display" style={{
+              <RevealText as="h2" className="display" style={{
                 fontSize: 'clamp(1.8rem, 4vw, 3rem)',
                 marginBottom: '1.75rem',
               }}>
                 A tight studio. A wide reach.
-              </h2>
+              </RevealText>
               <p style={{ color: 'var(--muted-2)', lineHeight: 1.8, marginBottom: '1rem' }}>
                 Pandr Solutions started in 2023 with a simple thesis: local businesses deserve the
                 same quality of design and marketing that Silicon Valley startups take for granted.
@@ -158,7 +160,7 @@ export default function Services() {
               display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem',
             }}>
               {values.map(v => (
-                <div key={v.t} style={{
+                <TiltCard key={v.t} maxTilt={4} style={{
                   padding: '1.5rem',
                   border: '1px solid var(--border)',
                   borderRadius: '14px',
@@ -169,7 +171,7 @@ export default function Services() {
                     color: 'var(--lime)',
                   }}>{v.t}</h3>
                   <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem', lineHeight: 1.6 }}>{v.d}</p>
-                </div>
+                </TiltCard>
               ))}
             </div>
           </div>
@@ -180,12 +182,12 @@ export default function Services() {
       <section className="section">
         <div className="container">
           <p className="eyebrow" style={{ marginBottom: '1rem' }}>Services</p>
-          <h2 className="display" style={{
+          <RevealText as="h2" className="display" style={{
             fontSize: 'clamp(2rem, 5vw, 4rem)',
             marginBottom: '4rem', maxWidth: '20ch',
           }}>
             Four disciplines. Deep on each.
-          </h2>
+          </RevealText>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {services.map((svc, i) => (
@@ -205,12 +207,12 @@ export default function Services() {
           }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: '1rem' }}>Industries</p>
-              <h2 className="display" style={{
+              <RevealText as="h2" className="display" style={{
                 fontSize: 'clamp(1.8rem, 4vw, 3rem)',
                 marginBottom: '1.5rem',
               }}>
                 Who we work with.
-              </h2>
+              </RevealText>
               <p style={{ color: 'var(--muted-2)', lineHeight: 1.75 }}>
                 We are generalists on purpose. Working across restaurants, clinics, tech companies
                 and community organizations means we bring pattern recognition from one category
@@ -220,14 +222,32 @@ export default function Services() {
             <div style={{
               display: 'flex', flexWrap: 'wrap', gap: '0.6rem', alignContent: 'flex-start',
             }}>
-              {industries.map(i => (
-                <span key={i} style={{
-                  padding: '0.65rem 1.1rem',
-                  border: '1px solid var(--border-strong)',
-                  borderRadius: '999px',
-                  fontSize: '0.85rem',
-                  color: 'var(--text)',
-                }}>{i}</span>
+              {industries.map((i, idx) => (
+                <span
+                  key={i}
+                  style={{
+                    padding: '0.65rem 1.1rem',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: '999px',
+                    fontSize: '0.85rem',
+                    color: 'var(--text)',
+                    cursor: 'default',
+                    transition: `background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)`,
+                    display: 'inline-block',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--lime)'
+                    e.currentTarget.style.borderColor = 'var(--lime)'
+                    e.currentTarget.style.color = '#000'
+                    e.currentTarget.style.transform = 'translateY(-3px)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.borderColor = 'var(--border-strong)'
+                    e.currentTarget.style.color = 'var(--text)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >{i}</span>
               ))}
             </div>
           </div>
@@ -237,19 +257,19 @@ export default function Services() {
       {/* CTA */}
       <section className="section">
         <div className="container" style={{ textAlign: 'center', maxWidth: '720px' }}>
-          <h2 className="display" style={{
+          <RevealText as="h2" className="display" style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
             marginBottom: '2rem',
           }}>
             Not sure which of these you need?
-          </h2>
+          </RevealText>
           <p style={{ color: 'var(--muted-2)', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2rem' }}>
             That is what a first call is for. Tell us what your business does and what is
             keeping you up at night. We will tell you honestly whether we can help.
           </p>
-          <Link to="/contact" className="btn-primary">
+          <MagneticLink to="/contact" className="btn-primary">
             Book an intro call <span>→</span>
-          </Link>
+          </MagneticLink>
         </div>
       </section>
     </main>
@@ -257,24 +277,77 @@ export default function Services() {
 }
 
 function ServiceBlock({ svc, isLast }) {
+  const wrapRef = useRef(null)
+  const glowRef = useRef(null)
+  const numRef = useRef(null)
+
+  const onMove = (e) => {
+    const el = wrapRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const nx = (e.clientX - r.left) / r.width
+    const ny = (e.clientY - r.top) / r.height
+    if (glowRef.current) {
+      glowRef.current.style.background = `radial-gradient(500px circle at ${nx * 100}% ${ny * 100}%, rgba(196,255,61,0.08), transparent 60%)`
+      glowRef.current.style.opacity = '1'
+    }
+    if (numRef.current) {
+      numRef.current.style.transform = `translate3d(${(nx - 0.5) * 8}px, ${(ny - 0.5) * 6}px, 0)`
+    }
+  }
+
+  const onLeave = () => {
+    if (glowRef.current) glowRef.current.style.opacity = '0'
+    if (numRef.current) numRef.current.style.transform = 'translate3d(0, 0, 0)'
+  }
+
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'minmax(80px, 100px) 1fr',
-      gap: 'clamp(1.5rem, 4vw, 3rem)',
-      padding: 'clamp(2rem, 5vw, 4rem) 0',
-      borderBottom: isLast ? 'none' : '1px solid var(--border)',
-      alignItems: 'flex-start',
-    }}>
-      <span className="display" style={{
-        fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-        color: 'var(--lime)',
-      }}>{svc.n}</span>
+    <div
+      ref={wrapRef}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{
+        position: 'relative',
+        display: 'grid',
+        gridTemplateColumns: 'minmax(80px, 100px) 1fr',
+        gap: 'clamp(1.5rem, 4vw, 3rem)',
+        padding: 'clamp(2rem, 5vw, 4rem) 0',
+        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+        alignItems: 'flex-start',
+        overflow: 'hidden',
+      }}
+    >
+      {/* cursor spotlight */}
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0,
+          pointerEvents: 'none',
+          opacity: 0,
+          transition: 'opacity 0.35s ease',
+          zIndex: 0,
+        }}
+      />
+
+      <span
+        ref={numRef}
+        className="display"
+        style={{
+          fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+          color: 'var(--lime)',
+          position: 'relative',
+          zIndex: 1,
+          willChange: 'transform',
+          transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        }}
+      >{svc.n}</span>
 
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: '3rem',
+        position: 'relative', zIndex: 1,
       }}>
         <div>
           <h3 className="display" style={{
@@ -297,18 +370,39 @@ function ServiceBlock({ svc, isLast }) {
         <div>
           <p className="eyebrow-muted" style={{ marginBottom: '1.25rem' }}>What you get</p>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {svc.deliverables.map(d => (
-              <li key={d} style={{
-                display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
-                color: 'var(--text)', fontSize: '0.95rem', lineHeight: 1.5,
-              }}>
-                <span style={{ color: 'var(--lime)', flexShrink: 0 }}>◆</span>
-                {d}
-              </li>
+            {svc.deliverables.map((d, i) => (
+              <DeliverableRow key={d} text={d} delay={i * 0.05} />
             ))}
           </ul>
         </div>
       </div>
     </div>
+  )
+}
+
+function DeliverableRow({ text, delay = 0 }) {
+  const ref = useRef(null)
+  return (
+    <li
+      ref={ref}
+      style={{
+        display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
+        color: 'var(--text)', fontSize: '0.95rem', lineHeight: 1.5,
+        transition: `transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s, color 0.2s ease`,
+        transform: 'translateX(0)',
+        cursor: 'default',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateX(8px)'
+        e.currentTarget.style.color = 'var(--lime)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateX(0)'
+        e.currentTarget.style.color = 'var(--text)'
+      }}
+    >
+      <span style={{ color: 'var(--lime)', flexShrink: 0 }}>◆</span>
+      {text}
+    </li>
   )
 }

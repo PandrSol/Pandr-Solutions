@@ -1,7 +1,11 @@
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Aurora from '../components/Aurora'
+import MagneticLink from '../components/MagneticLink'
+import RevealText from '../components/RevealText'
+import TiltCard from '../components/TiltCard'
+import Counter from '../components/Counter'
 import { useSEO } from '../hooks/useSEO'
+import { useRef } from 'react'
 
 const projects = [
   {
@@ -83,17 +87,12 @@ export default function Work() {
             className="eyebrow" style={{ marginBottom: '2rem' }}>
             Selected Work · 2023 — 2025
           </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="display"
-            style={{
-              fontSize: 'clamp(2.5rem, 7vw, 6rem)',
-              maxWidth: '14ch', marginBottom: '2rem',
-            }}
-          >
-            Real businesses. <span style={{ color: 'var(--lime)' }}>Real</span> outcomes.
-          </motion.h1>
+          <RevealText as="h1" className="display" style={{
+            fontSize: 'clamp(2.5rem, 7vw, 6rem)',
+            maxWidth: '14ch', marginBottom: '2rem',
+          }}>
+            Real businesses. Real outcomes.
+          </RevealText>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -128,12 +127,12 @@ export default function Work() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
             gap: '2rem', alignItems: 'flex-end',
           }}>
-            <h2 className="display" style={{
+            <RevealText as="h2" className="display" style={{
               fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)',
               maxWidth: '18ch',
             }}>
               The pattern behind every project we ship.
-            </h2>
+            </RevealText>
             {[
               { m: 'Weekly', l: 'Shipping cadence, no exceptions' },
               { m: 'Direct', l: 'Access to the person doing the work' },
@@ -151,18 +150,18 @@ export default function Work() {
       {/* CTA */}
       <section className="section">
         <div className="container" style={{ textAlign: 'center', maxWidth: '720px' }}>
-          <h2 className="display" style={{
+          <RevealText as="h2" className="display" style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
             marginBottom: '2rem',
           }}>
             Want to be the next case study?
-          </h2>
+          </RevealText>
           <p style={{ color: 'var(--muted-2)', fontSize: '1.05rem', marginBottom: '2rem' }}>
             We take on a small number of new clients each quarter. Tell us about your business.
           </p>
-          <Link to="/contact" className="btn-primary">
+          <MagneticLink to="/contact" className="btn-primary">
             Start the conversation <span>→</span>
-          </Link>
+          </MagneticLink>
         </div>
       </section>
     </main>
@@ -170,14 +169,79 @@ export default function Work() {
 }
 
 function CaseStudy({ p, isLast }) {
+  const wrapRef = useRef(null)
+  const glowRef = useRef(null)
+  const bigNumRef = useRef(null)
+
+  const onMove = (e) => {
+    const el = wrapRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const nx = (e.clientX - r.left) / r.width
+    const ny = (e.clientY - r.top) / r.height
+    if (glowRef.current) {
+      glowRef.current.style.background = `radial-gradient(600px circle at ${nx * 100}% ${ny * 100}%, rgba(196,255,61,0.06), transparent 60%)`
+      glowRef.current.style.opacity = '1'
+    }
+    if (bigNumRef.current) {
+      bigNumRef.current.style.transform = `translate3d(${(nx - 0.5) * -14}px, ${(ny - 0.5) * -10}px, 0)`
+    }
+  }
+
+  const onLeave = () => {
+    if (glowRef.current) glowRef.current.style.opacity = '0'
+    if (bigNumRef.current) bigNumRef.current.style.transform = 'translate3d(0, 0, 0)'
+  }
+
   return (
-    <article style={{
-      padding: 'clamp(3rem, 6vw, 5rem) 0',
-      borderTop: '1px solid var(--border)',
-      borderBottom: isLast ? '1px solid var(--border)' : 'none',
-    }}>
+    <article
+      ref={wrapRef}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{
+        position: 'relative',
+        padding: 'clamp(3rem, 6vw, 5rem) 0',
+        borderTop: '1px solid var(--border)',
+        borderBottom: isLast ? '1px solid var(--border)' : 'none',
+        overflow: 'hidden',
+      }}
+    >
+      {/* HUGE background number — parallax */}
+      <span
+        ref={bigNumRef}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '-1rem', right: '-2rem',
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(9rem, 22vw, 20rem)',
+          fontWeight: 500,
+          lineHeight: 1,
+          color: 'rgba(196,255,61,0.05)',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          letterSpacing: '-0.05em',
+          zIndex: 0,
+          transition: 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          willChange: 'transform',
+        }}
+      >{p.n}</span>
+
+      {/* cursor spotlight */}
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0,
+          pointerEvents: 'none',
+          opacity: 0,
+          transition: 'opacity 0.35s ease',
+          zIndex: 0,
+        }}
+      />
       {/* header */}
       <div style={{
+        position: 'relative', zIndex: 1,
         display: 'grid',
         gridTemplateColumns: 'minmax(60px, 80px) 1fr auto',
         gap: '1.5rem', alignItems: 'flex-start',
@@ -215,6 +279,7 @@ function CaseStudy({ p, isLast }) {
 
       {/* body */}
       <div style={{
+        position: 'relative', zIndex: 1,
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
         gap: 'clamp(2rem, 4vw, 3rem)',
@@ -232,13 +297,14 @@ function CaseStudy({ p, isLast }) {
 
       {/* outcome */}
       <div style={{
+        position: 'relative', zIndex: 1,
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '1.25rem',
         marginBottom: '3rem',
       }}>
         {p.outcome.map(o => (
-          <div key={o.label} style={{
+          <TiltCard key={o.label} maxTilt={5} style={{
             padding: '1.75rem',
             border: '1px solid var(--border)',
             borderRadius: '14px',
@@ -250,12 +316,13 @@ function CaseStudy({ p, isLast }) {
               marginBottom: '0.5rem',
             }}>{o.metric}</div>
             <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem', lineHeight: 1.5 }}>{o.label}</p>
-          </div>
+          </TiltCard>
         ))}
       </div>
 
       {/* quote */}
       <blockquote style={{
+        position: 'relative', zIndex: 1,
         padding: '2rem',
         borderLeft: '2px solid var(--lime)',
         marginLeft: 0,
