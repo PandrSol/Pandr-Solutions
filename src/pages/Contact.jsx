@@ -7,12 +7,12 @@ import { useSEO } from '../hooks/useSEO'
 
 const budgets = ['< $2k', '$2k – $5k', '$5k – $10k', '$10k+']
 const timelines = ['ASAP', 'Next month', 'Next quarter', 'Just exploring']
-const serviceOptions = ['Local SEO', 'Paid Ads', 'Social Media', 'Website & Brand', 'Not sure yet']
+const serviceOptions = ['Local SEO', 'Paid Ads', 'Social + AI Content', 'AI Video Ads', 'Website & Brand', 'Not sure yet']
 
 const faqs = [
   {
     q: 'Where are you based, and do you work with clients outside India?',
-    a: 'Our studio is in Vizag, Andhra Pradesh. We actively work with businesses in the United States (Nebraska, and remote), the UAE (Dubai), and across India. Every meeting happens over Google Meet or WhatsApp, and every deliverable is shared in a channel you already use.',
+    a: 'Our studio is based in India (Andhra Pradesh). We actively work with businesses in the United States (Nebraska, and remote), the UAE (Dubai), and across India. Every meeting happens over Google Meet or WhatsApp, and every deliverable is shared in a channel you already use.',
   },
   {
     q: 'How much does a typical engagement cost?',
@@ -39,7 +39,7 @@ const faqs = [
 export default function Contact() {
   useSEO({
     title: 'Contact — Pandr Solutions',
-    description: 'Tell us about your business. We reply to every message within one business day. Studio in Vizag, India. Working with clients in the US, UAE, and India.',
+    description: 'Tell us about your business. We reply to every message within one business day. Studio in India. Working with clients in India, the US, and the UAE.',
     path: '/contact',
   })
   const [form, setForm] = useState({
@@ -127,7 +127,7 @@ export default function Contact() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {[
-                  { label: 'Studio', value: 'Vizag, Andhra Pradesh, India' },
+                  { label: 'Studio', value: 'India (Andhra Pradesh)' },
                   { label: 'Active in', value: 'India · United States · UAE' },
                   { label: 'Response time', value: 'Within 1 business day' },
                   { label: 'Hours', value: 'Mon – Fri, IST + partner-local zones' },

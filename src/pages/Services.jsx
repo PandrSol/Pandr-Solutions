@@ -39,18 +39,18 @@ const services = [
   },
   {
     n: '03',
-    title: 'Social Media',
-    tagline: 'Owned audiences that outlast every ad platform.',
-    body: 'Paid ads rent attention. Social media builds an audience you own. Our team writes, shoots, edits and publishes content calendars designed for the algorithm your customers actually use. Reels, Shorts, static posts, and stories, all aligned to a real editorial voice for your brand, not generic templated slop.',
+    title: 'Social + AI Content',
+    tagline: 'Owned audiences, powered by AI-native production.',
+    body: 'Paid ads rent attention. Social media builds an audience you own. We combine hand-crafted editorial calendars with AI-generated video ads, AI-created post creatives, and image variations at scale, so your feed stays fresh every day without burning out a content team. Reels, Shorts, static posts, and stories, all aligned to a real editorial voice.',
     deliverables: [
       'Monthly content calendar & content pillars',
+      'AI-generated video ads for Meta, TikTok, YouTube',
+      'AI-created static & carousel post creatives',
       'On-brand reel & short-form video production',
-      'Photography direction & post design',
       'Community management & inbox response',
-      'Influencer & UGC coordination',
       'Growth analytics & monthly review call',
     ],
-    for: 'Brands that want to stop looking like every other business in their category.',
+    for: 'Brands that want a modern content engine without a full in-house studio.',
   },
   {
     n: '04',
@@ -120,7 +120,7 @@ export default function Services() {
               fontSize: 'clamp(1rem, 1.3vw, 1.15rem)', lineHeight: 1.7,
             }}
           >
-            Pandr Solutions is a four-discipline digital marketing studio based in Vizag, India,
+            Pandr Solutions is a four-discipline digital marketing studio based in India,
             serving ambitious local businesses across India, the United States and the UAE.
             Below is a real, honest look at what we do, how we work, and who we do it for.
           </motion.p>
@@ -147,7 +147,7 @@ export default function Services() {
                 Pandr Solutions started in 2023 with a simple thesis: local businesses deserve the
                 same quality of design and marketing that Silicon Valley startups take for granted.
                 We now work with restaurants in Omaha, tech companies in Dubai, and community
-                organizations in Nebraska, all from a studio in Vizag.
+                organizations in Nebraska, all from our studio in India.
               </p>
               <p style={{ color: 'var(--muted-2)', lineHeight: 1.8 }}>
                 We stay deliberately small. Every client works directly with the people executing

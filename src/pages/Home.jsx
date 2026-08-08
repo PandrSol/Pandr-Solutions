@@ -14,7 +14,8 @@ import { useSEO } from '../hooks/useSEO'
 
 const capabilities = [
   'Local SEO', 'Google Business', 'Meta Ads', 'Google Ads',
-  'Social Media', 'Content Studio', 'Web Design', 'Brand Identity',
+  'AI Video Ads', 'AI Content', 'Social Media', 'Content Studio',
+  'Web Design', 'Brand Identity', 'AI Post Generation',
   'Analytics', 'Landing Pages', 'Email Marketing', 'CRO',
 ]
 
@@ -33,9 +34,9 @@ const services = [
   },
   {
     n: '03',
-    title: 'Social Media',
-    body: 'Editorial content calendars, shot on brand, that turn followers into a real community around your business.',
-    deliverables: ['Content strategy', 'Reels & shorts', 'Community mgmt', 'Reporting'],
+    title: 'Social + AI Content',
+    body: 'Editorial content calendars, AI-generated video ads and post creatives, all on brand — so you show up daily without burning out.',
+    deliverables: ['Content strategy', 'AI video ads', 'AI post creatives', 'Community mgmt'],
   },
   {
     n: '04',
@@ -55,7 +56,7 @@ const stats = [
 export default function Home() {
   useSEO({
     title: 'Pandr Solutions — Digital Marketing Studio for Local Businesses',
-    description: 'A digital marketing studio based in Vizag, India, helping local businesses across the US, UAE and India grow through Local SEO, paid ads, social media, and websites that convert.',
+    description: 'A digital marketing studio in India, helping local businesses across India, the US and the UAE grow through Local SEO, paid ads, social media, AI-generated video, and websites that convert.',
     path: '/',
   })
   return (
@@ -85,7 +86,7 @@ export default function Home() {
               className="eyebrow"
               style={{ marginBottom: '1.75rem' }}
             >
-              Digital Marketing Studio · Vizag, India
+              Digital Marketing Studio · India
             </motion.p>
 
             <motion.h1
@@ -117,8 +118,8 @@ export default function Home() {
                 marginBottom: '2.25rem',
               }}
             >
-              A tight team of marketers, designers and engineers helping local businesses across
-              the US, UAE and India show up online, get found, and win their neighborhoods.
+              An India-based studio of marketers, designers and engineers helping local businesses
+              across India, the US, and the UAE show up online, get found, and win their neighborhoods.
             </motion.p>
 
             <motion.div
@@ -451,7 +452,7 @@ export default function Home() {
               marginBottom: '3rem',
             }}
           >
-            Headquartered in Vizag. Trusted by businesses in three countries.
+            Built in India. Trusted by businesses in three countries.
           </RevealText>
 
           <div style={{
@@ -460,7 +461,7 @@ export default function Home() {
             gap: '1.5rem',
           }}>
             {[
-              { region: 'India', city: 'Vizag, Andhra Pradesh', note: 'Home base. Studio, team, and where every project starts.' },
+              { region: 'India', city: 'Home Base', note: 'The studio, the team, and where every project starts. Based in Andhra Pradesh.' },
               { region: 'United States', city: 'Omaha, Nebraska', note: 'Restaurants, temples, and community organizations.' },
               { region: 'United Arab Emirates', city: 'Dubai', note: 'Technology companies and B2B brand work.' },
             ].map(r => (

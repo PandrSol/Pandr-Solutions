@@ -14,9 +14,10 @@ const navGroups = [
     title: 'Services',
     links: [
       { label: 'Local SEO', to: '/services' },
-      { label: 'Ad Campaigns', to: '/services' },
-      { label: 'Social Media', to: '/services' },
-      { label: 'Content Creation', to: '/services' },
+      { label: 'Paid Advertising', to: '/services' },
+      { label: 'Social + AI Content', to: '/services' },
+      { label: 'AI Video Ads', to: '/services' },
+      { label: 'Websites & Brand', to: '/services' },
     ],
   },
   {
@@ -124,7 +125,7 @@ export default function Footer() {
           paddingTop: '1.75rem', flexWrap: 'wrap', gap: '1rem',
         }}>
           <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-            © 2025 Pandr Solutions Pvt Ltd. Based in Vizag, India.
+            © 2025 Pandr Solutions Pvt Ltd. Made in India.
           </span>
           <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
             All rights reserved.
